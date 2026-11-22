@@ -87,3 +87,21 @@ def test_successful_login_clears_previous_failed_attempts():
     result = auth.authenticate("alice", "Alice123!Secure")
     assert result["success"] is True
     assert "alice" not in auth.attempts
+
+def test_dangerous_username_is_rejected():
+    password = "ValidPassword123!"
+
+    result = auth.register_user("admin'--", password)
+
+    assert result is False
+    assert "admin'--" not in auth.users
+
+
+def test_same_password_produces_different_stored_hashes():
+    password = "SamePassword123!"
+
+    assert auth.register_user("alice1", password) is True
+    assert auth.register_user("bob123", password) is True
+
+    assert auth.users["alice1"] != auth.users["bob123"]
+
